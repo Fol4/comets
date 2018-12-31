@@ -14,7 +14,7 @@ window = pygame.display.set_mode((1200,1024))
 
 x,y = 50 , 50
 width , height = 10 , 10
-speed = 5
+speed = 4
 # button = 0
 
 
