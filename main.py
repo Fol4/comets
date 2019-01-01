@@ -1,12 +1,11 @@
 import pygame
-from math import acos , degrees , cos , sin
 pygame.init()
 
 
 'windows settings'
 
 pygame.display.init()
-window = pygame.display.set_mode((1200,1024))
+window = pygame.display.set_mode((1600,900))
 
 
 'constant'
@@ -15,7 +14,7 @@ game_run = True
 
 'missile'
 missile_data = []
-missile_speed = 5
+missile_speed = 3500
 
 'rocket'
 x,y = 50 , 50
@@ -28,39 +27,31 @@ def angel_calc(missile_x,missile_y,x,y):
     dx = missile_x - x
     dy = missile_y - y
     length = ( dx**2 + dy**2 )**1/2
-    if dy < 0 and dx >0:
-        cos_alpha = abs(dy/length)
-        alpha = degrees(acos(cos_alpha))
-    elif dx > 0 and dy > 0:
-        cos_alpha = dy / length
-        alpha = -degrees(acos(cos_alpha))
-    elif dy > 0 and dx < 0 :
-        cos_alpha = dy / length
-        alpha = degrees(acos(cos_alpha))
-    else:
-        cos_alpha = dx / length
-        alpha = -degrees(acos(cos_alpha))
-    return alpha
+    cos_alpha = dx/length
+    sin_alpha = dy/length
+    return cos_alpha, sin_alpha
 
 
 
 def missile_spawn(self,missile_x,missile_y,x,y):
     missile = pygame.draw.rect(self , (255,255,255) , (x , y , 5 , 5))
-    alpha = angel_calc(missile_x,missile_y,x,y)
+    cos_alpha , sin_alpha = angel_calc(missile_x,missile_y,x,y)
     info = {'missile': missile,
             'target': [missile_x,missile_y],
-             'pos': [x,y],
-            'angel': alpha}
+            'pos': [x,y],
+            'cos': cos_alpha,
+            'sin': sin_alpha}
     missile_data.append(info)
 
-def missile_flight(self,speed,data):
+def missile_flight(self,speed):
     for info in missile_data:
         target = info['target']
         pos = info['pos']
-        alpha = info['angel']
-        if abs(target[0] - pos[0]) > speed and abs(target[1] - pos[1]) > speed:
-            info['pos'][0] += speed*cos(alpha)
-            info['pos'][1] += speed*sin(alpha)
+        cos_alpha = info['cos']
+        sin_alpha = info['sin']
+        if abs(target[0] - pos[0]) > 4 and abs(target[1] - pos[1]) > 4:
+            info['pos'][0] += speed*cos_alpha
+            info['pos'][1] += speed*sin_alpha
             missile = pygame.draw.rect(self, (255, 255, 255), (pos[0], pos[1], 5, 5))
             info['missile'] = missile
 
@@ -72,7 +63,7 @@ while game_run:
     pygame.display.update()
     window.fill((46,125,50))
     window.blit(rocket , (x,y))
-    missile_flight(window,missile_speed,missile_data)
+    missile_flight(window,missile_speed)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_run = False
