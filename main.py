@@ -17,7 +17,6 @@ comet_data = []
 comet_speed = 1000
 comet_constant = 0
 
-
 #missile
 missile_data = []
 missile_speed = 5000
@@ -46,6 +45,7 @@ def spawnMissile(self, missile_x, missile_y, x, y):
     missile = pygame.draw.rect(self , (255,255,255) , (x , y , 5 , 5))
     cos_alpha , sin_alpha = calcAngel(missile_x, missile_y, x, y)
     info = {'object': missile,
+            'type': 'missile',
             'size': [5,5],
             'color': (255,255,255),
             'target': [missile_x,missile_y],
@@ -81,13 +81,15 @@ def spawnComet(self , number , width , height , win_width = None , win_height = 
         comet = pygame.draw.rect(self, (0, 0, 0), (x1, y1, width, height))
         cos_alpha, sin_alpha = calcAngel(x2, y2, x1, y1)
     info = {'object': comet,
+            'type' : 'comet',
             'size': [width , height],
             'color' : (0,0,0),
             'target': [x2, y2],
             'start_pos': [x1,y1],
             'pos': [x1, y1],
             'sin': sin_alpha,
-            'cos': cos_alpha }
+            'cos': cos_alpha ,
+            'status' : number}
     comet_data.append(info)
 
 # def spawnDestroyedComet(self , x, y):
@@ -117,16 +119,41 @@ def destroyObject(self ,target_data , destroyer_data):
         target_pos = target['pos']
         object1 = target['object']
         x1,y1 = target_pos[0] , target_pos[1]
-        x2,y2 = target['start_pos'][0] , target['start_pos'][1]
         x3,y3 = target['target'][0] , target['target'][1]
         for destroyer in destroyer_data:
             object2 = destroyer['object']
             destroyer_pos = destroyer['pos']
-            if abs(target_pos[0] - destroyer_pos[0]) <= 15 and abs(target_pos[1] - destroyer_pos[1]) <= 15 and object1 != object2:
-                target_data.remove(target)
-                destroyer_data.remove(destroyer)
-                spawnComet(self , 2 , 5 , 5 , x1 = x1 , y1 = y1 , x2 = x2 , y2 = y2)
-                spawnComet(self , 2 , 5 , 5 , x1 = x1 , y1 = y1 , x2 = x3 , y2 = y3)
+            if abs(target_pos[0] - destroyer_pos[0]) <= 20 and abs(target_pos[1] - destroyer_pos[1]) <= 20 and object1 != object2:
+                if target['type'] == destroyer['type']:
+                    x2, y2 = destroyer['target'][0], destroyer['target'][1]
+                    if target['status'] !=3 and destroyer['status'] != 3:
+                        spawnComet(self , target['status'] + 1 , target['size'][0] - 5 , target['size'][1] - 5 , x1 = x1 , y1 = y1 ,
+                                   x2 = x3  , y2 = y3)
+                        spawnComet(self , destroyer['status'] + 1, destroyer['size'][0] - 5 , destroyer['size'][1] - 5 , x1 = x1 , y1 = y1 ,
+                                   x2 = x2 , y2 = y2)
+                        target_data.remove(target)
+                        destroyer_data.remove(destroyer)
+                    elif target['status'] == 3 and destroyer['status'] != 3:
+                        spawnComet(self, destroyer['status'] + 1, destroyer['size'][0] - 5, destroyer['size'][1] - 5,x1=x1, y1=y1,
+                                   x2=x2, y2=y2)
+                        target_data.remove(target)
+                        destroyer_data.remove(destroyer)
+                    elif target['status'] != 3 and destroyer['status'] == 3:
+                        spawnComet(self, target['status'] + 1, target['size'][0] - 5, target['size'][1] - 5, x1=x1,y1=y1,
+                                   x2=x3, y2=y3)
+                        target_data.remove(target)
+                        destroyer_data.remove(destroyer)
+                    else:
+                        target_data.remove(target)
+                        destroyer_data.remove(destroyer)
+                elif target['status'] != 3:
+                    spawnComet(self, target['status'] + 1, target['size'][0] - 5, target['size'][1] - 5, x1=x1, y1=y1,
+                               x2=x3, y2=y3)
+                    target_data.remove(target)
+                    destroyer_data.remove(destroyer)
+                else:
+                    target_data.remove(target)
+                    destroyer_data.remove(destroyer)
                 break
 
 def launchComet():
