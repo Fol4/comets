@@ -17,6 +17,7 @@ comet_data = []
 comet_speed = 1000
 comet_constant = 0
 
+
 #missile
 missile_data = []
 missile_speed = 5000
