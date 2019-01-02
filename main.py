@@ -16,6 +16,7 @@ game_run = True
 comet_data = []
 comet_speed = 1000
 comet_constant = 0
+# comets_image = pygame.image.load('image/comets.png')
 
 #missile
 missile_data = []
@@ -92,8 +93,6 @@ def spawnComet(self , number , width , height , win_width = None , win_height = 
             'status' : number}
     comet_data.append(info)
 
-# def spawnDestroyedComet(self , x, y):
-
 def flightObject(self, speed, data):
     for info in data:
         target = info['target']
@@ -109,7 +108,7 @@ def flightObject(self, speed, data):
             data.remove(info)
 
 def drawRocket():
-    pygame.time.delay(20)
+    pygame.time.delay(50)
     pygame.display.update()
     window.fill((46, 125, 50))
     window.blit(rocket, (x, y))
@@ -127,10 +126,10 @@ def destroyObject(self ,target_data , destroyer_data):
                 if target['type'] == destroyer['type']:
                     x2, y2 = destroyer['target'][0], destroyer['target'][1]
                     if target['status'] !=3 and destroyer['status'] != 3:
-                        spawnComet(self , target['status'] + 1 , target['size'][0] - 5 , target['size'][1] - 5 , x1 = x1 , y1 = y1 ,
-                                   x2 = x3  , y2 = y3)
+                        spawnComet(self , target['status'] + 1 , target['size'][0] - 5 , target['size'][1] - 5 , x1 = x1+21 , y1 = y1+21 ,
+                                   x2 = x2  , y2 = y2)
                         spawnComet(self , destroyer['status'] + 1, destroyer['size'][0] - 5 , destroyer['size'][1] - 5 , x1 = x1 , y1 = y1 ,
-                                   x2 = x2 , y2 = y2)
+                                   x2 = x3 , y2 = y3)
                         target_data.remove(target)
                         destroyer_data.remove(destroyer)
                     elif target['status'] == 3 and destroyer['status'] != 3:
