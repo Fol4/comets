@@ -8,13 +8,20 @@ pygame.init()
 win_width , win_height = 1600 , 900
 pygame.display.init()
 window = pygame.display.set_mode((win_width,win_height))
+window.fill((46, 125, 50))
+enter_game = 'Press Space'
+pygame.font.init()
+font = pygame.font.Font(None , 100)
+text = font.render(enter_game , True , (0,0,0))
 
 'constant'
 game_run = True
+menu_settings = 1
+start_constant = 0
 
 #comet
 comet_data = []
-comet_speed = 1000
+comet_speed = 2000
 comet_constant = 0
 # comets_image = pygame.image.load('image/comets.png')
 
@@ -26,6 +33,7 @@ missile_speed = 5000
 x,y = win_width // 2 , win_height // 2
 width , height = 10 , 10
 speed = 4
+rockethealth = 50
 rocket = pygame.Surface((width,height))
 rocket.fill((78, 52, 46))
 
@@ -108,7 +116,7 @@ def flightObject(self, speed, data):
             data.remove(info)
 
 def drawRocket():
-    pygame.time.delay(50)
+    pygame.time.delay(20)
     pygame.display.update()
     window.fill((46, 125, 50))
     window.blit(rocket, (x, y))
@@ -156,21 +164,33 @@ def destroyObject(self ,target_data , destroyer_data):
                 break
 
 def launchComet():
-    global comet_constant
+    global comet_constant , start_constant
     comet_constant += 1
-    if comet_constant == 10:
+    if comet_constant == 3:
         comet_constant = 0
-        spawnComet(window , 1 , 15 , 15  , win_width = win_width, win_height = win_height)
-        print(comet_data)
+        spawnComet(window , 1 , 20 , 20  , win_width = win_width, win_height = win_height)
+
+def lifeRocket(x , y , data):
+    global  rockethealth , game_run
+    for info in data:
+        pos = info['pos']
+        if abs(x-pos[0]) <= 20 and abs(y-pos[1]) <= 20 and rockethealth != 0:
+            rockethealth -= 10
+            data.remove(info)
+        elif rockethealth == 0:
+            game_run = False
+
 'main loop'
 
+
 while game_run:
+    window.blit(text, (win_width // 2.9, win_height // 2.1))
     drawRocket()
-    launchComet()
     flightObject(window, missile_speed, missile_data)
     flightObject(window, comet_speed, comet_data)
     destroyObject(window , comet_data , missile_data)
-    destroyObject(window , comet_data , comet_data)
+    #destroyObject(window , comet_data , comet_data)
+    lifeRocket(x , y , comet_data)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_run = False
@@ -189,4 +209,10 @@ while game_run:
         y -= speed
     if keys[pygame.K_s] and y < win_height - 2*height:
         y += speed
+    if keys[pygame.K_SPACE]:
+        start_constant = 1
+        enter_game = ''
+        text = font.render(enter_game, True, (0, 0, 0))
+    if start_constant == 1:
+        launchComet()
 
