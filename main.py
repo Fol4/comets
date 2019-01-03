@@ -189,7 +189,7 @@ while game_run:
     flightObject(window, missile_speed, missile_data)
     flightObject(window, comet_speed, comet_data)
     destroyObject(window , comet_data , missile_data)
-    #destroyObject(window , comet_data , comet_data)
+    destroyObject(window , comet_data , comet_data)
     lifeRocket(x , y , comet_data)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
