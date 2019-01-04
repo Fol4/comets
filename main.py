@@ -13,11 +13,14 @@ enter_game = 'Press Space'
 pygame.font.init()
 font = pygame.font.Font(None , 100)
 text = font.render(enter_game , True , (0,0,0))
+text_width = win_width // 2.9
+text_height = win_height // 2.1
 
 'constant'
 game_run = True
 menu_settings = 1
-start_constant = 0
+start_constant = False
+restart_constant = 0
 
 #comet
 comet_data = []
@@ -31,9 +34,11 @@ missile_speed = 5000
 
 #rocket
 x,y = win_width // 2 , win_height // 2
+x_restart , y_restart = win_width // 2 , win_height // 2
 width , height = 10 , 10
 speed = 4
 rockethealth = 50
+rockethealth_restart = 50
 rocket = pygame.Surface((width,height))
 rocket.fill((78, 52, 46))
 
@@ -171,20 +176,29 @@ def launchComet():
         spawnComet(window , 1 , 20 , 20  , win_width = win_width, win_height = win_height)
 
 def lifeRocket(x , y , data):
-    global  rockethealth , game_run
+    global  rockethealth , game_run , restart_constant
     for info in data:
         pos = info['pos']
         if abs(x-pos[0]) <= 20 and abs(y-pos[1]) <= 20 and rockethealth != 0:
             rockethealth -= 10
             data.remove(info)
         elif rockethealth == 0:
-            game_run = False
+            restart_constant = True
+
+def restartGame():
+    global x_restart , y_restart , comet_data , missile_data , rockethealth , rockethealth_restart
+    x = x_restart
+    y = y_restart
+    rockethealth = rockethealth_restart
+    comet_data.clear()
+    missile_data.clear()
+    return x,y
 
 'main loop'
 
 
 while game_run:
-    window.blit(text, (win_width // 2.9, win_height // 2.1))
+    window.blit(text, (text_width, text_height ))
     drawRocket()
     flightObject(window, missile_speed, missile_data)
     flightObject(window, comet_speed, comet_data)
@@ -215,4 +229,11 @@ while game_run:
         text = font.render(enter_game, True, (0, 0, 0))
     if start_constant == 1:
         launchComet()
+    if restart_constant == True:
+        restartGame()
+        restart_constant = False
+        start_constant = 0
+        text = font.render('Press Space for restart game' , True , (0,0,0))
+        text_width = win_width // 4
+        text_height = win_height // 2.1
 
