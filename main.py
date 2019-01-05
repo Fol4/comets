@@ -5,7 +5,8 @@ pygame.init()
 
 
 'windows settings'
-win_width , win_height = 1600 , 900
+
+win_width , win_height= 1600 , 900
 pygame.display.init()
 window = pygame.display.set_mode((win_width,win_height))
 window.fill((46, 125, 50))
@@ -25,6 +26,9 @@ restart_constant = 0
 hp_constant = 10
 hp_constant_restart = 10
 hp_pack = []
+time = pygame.time.Clock()
+score = 0
+
 
 #comet
 comet_data = []
@@ -196,14 +200,20 @@ def restartGame():
     missile_data.clear()
     return x,y
 
-def spawnStatusBar(self , hp_constant):
+def spawnStatusBar(self , hp_constant , score):
     font = pygame.font.Font(None , 31)
-    text = font.render('HP' ,True , (0,0,0))
-    self.blit(text , (0 ,0))
-    x , y = 12 , 4
+    hp_text = font.render('HP' ,True , (0,0,0))
+    self.blit(hp_text , (10 ,win_height - 100))
+    x , y = 22 , win_height - 96
     for info in range(hp_constant):
         x+= 20
         hp = pygame.draw.rect(self , (255 , 0 ,0 ) , (x , y ,12 , 12 ))
+    score_text = font.render('Score', True, (0, 0, 0))
+    self.blit(score_text , (10, 50))
+    score_display = int(score//10)
+    const = 4 - score_display // 10
+    display_score_text = font.render('0'*const+str(score_display) , True , (0,0,0))
+    self.blit(display_score_text , (80 , 50))
 
 def spawnHP(self , x_rocket , y_rocket ):
     global hp_constant
@@ -229,6 +239,7 @@ def spawnHP(self , x_rocket , y_rocket ):
 
 while game_run:
     window.blit(text, (text_width, text_height ))
+    score += time.get_time()/1000
     drawRocket()
     flightObject(window, missile_speed, missile_data)
     flightObject(window, comet_speed, comet_data)
@@ -257,9 +268,10 @@ while game_run:
         start_constant = True
         enter_game = ''
         text = font.render(enter_game, True, (0, 0, 0))
+        time.tick()
     if start_constant:
         launchComet()
-        spawnStatusBar(window, hp_constant)
+        spawnStatusBar(window, hp_constant , score)
         spawnHP(window , x , y )
     if restart_constant:
         restartGame()
