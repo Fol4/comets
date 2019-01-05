@@ -17,10 +17,13 @@ text_width = win_width // 2.9
 text_height = win_height // 2.1
 
 'constant'
+
 game_run = True
 menu_settings = 1
 start_constant = False
 restart_constant = 0
+hp_constant = 10
+hp_constant_restart = 10
 
 #comet
 comet_data = []
@@ -175,24 +178,35 @@ def launchComet():
         comet_constant = 0
         spawnComet(window , 1 , 20 , 20  , win_width = win_width, win_height = win_height)
 
-def lifeRocket(x , y , data):
-    global  rockethealth , game_run , restart_constant
+def lifeRocket(x , y , data ):
+    global  game_run , restart_constant ,hp_constant
     for info in data:
         pos = info['pos']
-        if abs(x-pos[0]) <= 20 and abs(y-pos[1]) <= 20 and rockethealth != 0:
-            rockethealth -= 10
+        if abs(x-pos[0]) <= 20 and abs(y-pos[1]) <= 20 and hp_constant != 0:
+            hp_constant -= 1
             data.remove(info)
-        elif rockethealth == 0:
+        elif hp_constant == 0:
             restart_constant = True
 
 def restartGame():
-    global x_restart , y_restart , comet_data , missile_data , rockethealth , rockethealth_restart
+    global x_restart , y_restart , comet_data , missile_data , hp_constant
     x = x_restart
     y = y_restart
-    rockethealth = rockethealth_restart
+    hp_constant = hp_constant_restart
     comet_data.clear()
     missile_data.clear()
     return x,y
+
+def spawnStatusBar(self , hp_constant):
+    font = pygame.font.Font(None , 31)
+    text = font.render('HP' ,True , (0,0,0))
+    self.blit(text , (0 ,0))
+    x , y = 12 , 4
+    for info in range(hp_constant):
+        x+= 20
+        hp = pygame.draw.rect(self , (255 , 0 ,0 ) , (x , y ,12 , 12 ))
+
+
 
 'main loop'
 
@@ -229,11 +243,12 @@ while game_run:
         text = font.render(enter_game, True, (0, 0, 0))
     if start_constant == 1:
         launchComet()
+        spawnStatusBar(window, hp_constant)
     if restart_constant == True:
         restartGame()
         restart_constant = False
         start_constant = 0
         text = font.render('Press Space for restart game' , True , (0,0,0))
-        text_width = win_width // 4
+        text_width = win_width // 4.5
         text_height = win_height // 2.1
 
