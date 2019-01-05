@@ -19,11 +19,12 @@ text_height = win_height // 2.1
 'constant'
 
 game_run = True
-menu_settings = 1
+# menu_settings = 1
 start_constant = False
 restart_constant = 0
 hp_constant = 10
 hp_constant_restart = 10
+hp_pack = []
 
 #comet
 comet_data = []
@@ -40,8 +41,6 @@ x,y = win_width // 2 , win_height // 2
 x_restart , y_restart = win_width // 2 , win_height // 2
 width , height = 10 , 10
 speed = 4
-rockethealth = 50
-rockethealth_restart = 50
 rocket = pygame.Surface((width,height))
 rocket.fill((78, 52, 46))
 
@@ -172,14 +171,14 @@ def destroyObject(self ,target_data , destroyer_data):
                 break
 
 def launchComet():
-    global comet_constant , start_constant
+    global comet_constant
     comet_constant += 1
     if comet_constant == 3:
         comet_constant = 0
         spawnComet(window , 1 , 20 , 20  , win_width = win_width, win_height = win_height)
 
 def lifeRocket(x , y , data ):
-    global  game_run , restart_constant ,hp_constant
+    global  restart_constant ,hp_constant
     for info in data:
         pos = info['pos']
         if abs(x-pos[0]) <= 20 and abs(y-pos[1]) <= 20 and hp_constant != 0:
@@ -206,7 +205,24 @@ def spawnStatusBar(self , hp_constant):
         x+= 20
         hp = pygame.draw.rect(self , (255 , 0 ,0 ) , (x , y ,12 , 12 ))
 
-
+def spawnHP(self , x_rocket , y_rocket ):
+    global hp_constant
+    const = random.randint(1 , 1000)
+    if const == 50:
+        x = random.randint(100 , win_width - 100)
+        y = random.randint(100 , win_height - 100)
+        hp = pygame.draw.rect(self , (255,0,0) , (x , y , 20 , 20))
+        info = {'object': hp ,
+                'pos' : [x,y]}
+        hp_pack.append(info)
+    for const in hp_pack:
+        pos = const['pos']
+        hp = pygame.draw.rect(self, (255, 0, 0), (pos[0], pos[1], 20 , 20))
+        const['object'] = hp
+        if abs(x_rocket - pos[0]) <=20 and abs(y_rocket - pos[1]) <=30 :
+            if hp_constant < 10:
+                hp_constant += 1
+            hp_pack.remove(const)
 
 'main loop'
 
@@ -238,13 +254,14 @@ while game_run:
     if keys[pygame.K_s] and y < win_height - 2*height:
         y += speed
     if keys[pygame.K_SPACE]:
-        start_constant = 1
+        start_constant = True
         enter_game = ''
         text = font.render(enter_game, True, (0, 0, 0))
-    if start_constant == 1:
+    if start_constant:
         launchComet()
         spawnStatusBar(window, hp_constant)
-    if restart_constant == True:
+        spawnHP(window , x , y )
+    if restart_constant:
         restartGame()
         restart_constant = False
         start_constant = 0
