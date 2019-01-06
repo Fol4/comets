@@ -14,8 +14,9 @@ enter_game = 'Press Space'
 pygame.font.init()
 font = pygame.font.Font(None , 100)
 text = font.render(enter_game , True , (0,0,0))
+score_text = font.render('', True, (0, 0, 0))
 text_width = win_width // 2.9
-text_height = win_height // 2.1
+text_height = win_height // 2.4
 
 'constant'
 
@@ -28,7 +29,7 @@ hp_constant_restart = 10
 hp_pack = []
 time = pygame.time.Clock()
 score = 0
-
+score_text_width , score_text_height = 0 , 0
 
 #comet
 comet_data = []
@@ -125,12 +126,6 @@ def flightObject(self, speed, data):
             info['object'] = object
         else:
             data.remove(info)
-
-def drawRocket():
-    pygame.time.delay(20)
-    pygame.display.update()
-    window.fill((46, 125, 50))
-    window.blit(rocket, (x, y))
 
 def destroyObject(self ,target_data , destroyer_data):
     for target in target_data:
@@ -239,13 +234,10 @@ def spawnHP(self , x_rocket , y_rocket ):
 
 while game_run:
     window.blit(text, (text_width, text_height ))
-    score += time.get_time()/1000
-    drawRocket()
-    flightObject(window, missile_speed, missile_data)
-    flightObject(window, comet_speed, comet_data)
-    destroyObject(window , comet_data , missile_data)
-    destroyObject(window , comet_data , comet_data)
-    lifeRocket(x , y , comet_data)
+    window.blit(score_text, (score_text_width , score_text_height))
+    pygame.time.delay(20)
+    pygame.display.update()
+    window.fill((46, 125, 50))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_run = False
@@ -273,11 +265,19 @@ while game_run:
         launchComet()
         spawnStatusBar(window, hp_constant , score)
         spawnHP(window , x , y )
+        score += time.get_time() / 1000
+        flightObject(window, missile_speed, missile_data)
+        flightObject(window, comet_speed, comet_data)
+        destroyObject(window, comet_data, missile_data)
+        destroyObject(window, comet_data, comet_data)
+        lifeRocket(x, y, comet_data)
+        window.blit(rocket, (x, y))
     if restart_constant:
+        time.tick()
         restartGame()
         restart_constant = False
         start_constant = 0
         text = font.render('Press Space for restart game' , True , (0,0,0))
-        text_width = win_width // 4.5
-        text_height = win_height // 2.1
-
+        text_width , text_height = win_width // 4.5 ,win_height // 2.6
+        score_text = font.render('Final Score : ' + str(int(score//10)) , True , (0,0,0))
+        score_text_width , score_text_height = win_width//2 - 225 , win_height//2
