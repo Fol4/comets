@@ -10,18 +10,16 @@ win_width , win_height= 1600 , 900
 pygame.display.init()
 window = pygame.display.set_mode((win_width,win_height))
 window.fill((46, 125, 50))
-enter_game = 'Press Space'
+enter_game = ''
 pygame.font.init()
 font = pygame.font.Font(None , 100)
 text = font.render(enter_game , True , (0,0,0))
-score_text = font.render('', True, (0, 0, 0))
 text_width = win_width // 2.9
 text_height = win_height // 2.4
 
 'constant'
 
 game_run = True
-# menu_settings = 1
 start_constant = False
 restart_constant = 0
 hp_constant = 10
@@ -30,6 +28,25 @@ hp_pack = []
 time = pygame.time.Clock()
 score = 0
 score_text_width , score_text_height = 0 , 0
+delay = 75
+
+#score
+clear_score = False
+final_score = 'Final Score : '
+score_text = font.render('', True, (0, 0, 0))
+
+#menu
+menu_constant = 0
+menu_data = []
+x_menu , y_menu =win_width//2.3 , 200
+menu_name = ['START' , 'SETTINGS' , 'ABOUT']
+menu_spawn_constant = len(menu_name)
+menu_spawn = True
+menu_draw = True
+
+#arrow
+x_arrow , y_arrow = win_width // 1.8 , 307
+arrow_width , arrow_height = 15 , 15
 
 #comet
 comet_data = []
@@ -187,13 +204,12 @@ def lifeRocket(x , y , data ):
             restart_constant = True
 
 def restartGame():
-    global x_restart , y_restart , comet_data , missile_data , hp_constant
+    global  comet_data , missile_data , hp_constant , x , y
     x = x_restart
     y = y_restart
     hp_constant = hp_constant_restart
     comet_data.clear()
     missile_data.clear()
-    return x,y
 
 def spawnStatusBar(self , hp_constant , score):
     font = pygame.font.Font(None , 31)
@@ -229,13 +245,41 @@ def spawnHP(self , x_rocket , y_rocket ):
                 hp_constant += 1
             hp_pack.remove(const)
 
+def drawArrow(self , arrow_x , arraw_y , arrow_width , arrow_height):
+    pygame.draw.rect(self , (0,0,0) , (arrow_x , arraw_y , arrow_width , arrow_height))
+
+def swapMenu(arrow_pos , menu_data):
+    i = 0
+    for info in menu_data:
+        if i == arrow_pos :
+            pos = info['pos']
+        i+=1
+    return pos[0]+200 , pos[1]+7
+
+def spawnMenu(self):
+    global x_menu , y_menu , menu_spawn_constant
+    for spawned in range(menu_spawn_constant):
+        y_menu += 100
+        x,y = x_menu , y_menu
+        font = pygame.font.Font(None , 50)
+        text = font.render(str(menu_name[spawned]) , True , (0,0,0) )
+        self.blit(text , (x,y))
+        info = {'text' : text,
+                'pos' : [x,y]}
+        menu_data.append(info)
+
+def drawMenu(self):
+    for info in menu_data:
+        window.blit(info['text'] , (info['pos'][0] , info['pos'][1]))
 'main loop'
+
+
 
 
 while game_run:
     window.blit(text, (text_width, text_height ))
     window.blit(score_text, (score_text_width , score_text_height))
-    pygame.time.delay(20)
+    pygame.time.delay(delay)
     pygame.display.update()
     window.fill((46, 125, 50))
     for event in pygame.event.get():
@@ -245,6 +289,7 @@ while game_run:
             missile_x, missile_y = pygame.mouse.get_pos()
             missile_x, missile_y = int(missile_x) , int(missile_y)
             spawnMissile(window, missile_x, missile_y, x, y)
+
 
     keys = pygame.key.get_pressed()
 
@@ -257,10 +302,35 @@ while game_run:
     if keys[pygame.K_s] and y < win_height - 2*height:
         y += speed
     if keys[pygame.K_SPACE]:
-        start_constant = True
-        enter_game = ''
-        text = font.render(enter_game, True, (0, 0, 0))
+        if clear_score:
+            final_score = ''
+            score_text = font.render(final_score, True, (0, 0, 0))
+        if menu_constant == 0:
+            start_constant = True
+        if menu_constant == 1:
+            text = font.render('TODAY I AM TIRED .COMEBACK TOMORROW' , True , (0,0,0))
+        if menu_constant == 2:
+            text = font.render('BLALALALA' , True , (0,0,0))
+        menu_draw = False
         time.tick()
+    if keys[pygame.K_DOWN]:
+        menu_constant += 1
+        print(menu_constant)
+        if menu_constant == 3:
+            menu_constant = 0
+        x_arrow , y_arrow = swapMenu(menu_constant,menu_data)
+    if keys[pygame.K_UP]:
+        menu_constant += 1
+        print(menu_constant)
+        if menu_constant == 3:
+            menu_constant = 0
+        x_arrow , y_arrow = swapMenu(menu_constant,menu_data)
+    if menu_spawn:
+        spawnMenu(window)
+        menu_spawn = False
+    if menu_draw:
+        drawMenu(window)
+        drawArrow(window, x_arrow, y_arrow, arrow_width, arrow_height)
     if start_constant:
         launchComet()
         spawnStatusBar(window, hp_constant , score)
@@ -272,12 +342,14 @@ while game_run:
         destroyObject(window, comet_data, comet_data)
         lifeRocket(x, y, comet_data)
         window.blit(rocket, (x, y))
+        delay = 20
     if restart_constant:
         time.tick()
         restartGame()
         restart_constant = False
+        clear_score = True
         start_constant = 0
         text = font.render('Press Space for restart game' , True , (0,0,0))
         text_width , text_height = win_width // 4.5 ,win_height // 2.6
-        score_text = font.render('Final Score : ' + str(int(score//10)) , True , (0,0,0))
+        score_text = font.render(final_score + str(int(score//10)) , True , (0,0,0))
         score_text_width , score_text_height = win_width//2 - 225 , win_height//2
