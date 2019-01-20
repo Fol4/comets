@@ -3,13 +3,20 @@ import random
 
 pygame.init()
 
+'constant'
 
-'windows settings'
+game_run = True
+start_constant = False
+restart_constant = 0
+delay = 80
 
+#window
 win_width , win_height= 1600 , 900
 pygame.display.init()
 window = pygame.display.set_mode((win_width,win_height))
 window.fill((46, 125, 50))
+
+#text
 enter_game = ''
 pygame.font.init()
 font = pygame.font.Font(None , 100)
@@ -17,23 +24,20 @@ text = font.render(enter_game , True , (0,0,0))
 text_width = win_width // 2.9
 text_height = win_height // 2.4
 
-'constant'
+#time
+time = pygame.time.Clock()
 
-game_run = True
-start_constant = False
-restart_constant = 0
+#hp
 hp_constant = 10
 hp_constant_restart = 10
 hp_pack = []
-time = pygame.time.Clock()
-score = 0
-score_text_width , score_text_height = 0 , 0
-delay = 75
 
 #score
 clear_score = False
 final_score = 'Final Score : '
 score_text = font.render('', True, (0, 0, 0))
+score = 0
+score_text_width , score_text_height = 0 , 0
 
 #menu
 menu_constant = 0
@@ -43,6 +47,9 @@ menu_name = ['START' , 'SETTINGS' , 'ABOUT']
 menu_spawn_constant = len(menu_name)
 menu_spawn = True
 menu_draw = True
+menu_info = False
+difficult = ['EASY' , 'MEDIUM' , 'HARD']
+difficult_constant = 0
 
 #arrow
 x_arrow , y_arrow = win_width // 1.8 , 307
@@ -189,7 +196,7 @@ def destroyObject(self ,target_data , destroyer_data):
 def launchComet():
     global comet_constant
     comet_constant += 1
-    if comet_constant == 3:
+    if comet_constant == 3-difficult_constant:
         comet_constant = 0
         spawnComet(window , 1 , 20 , 20  , win_width = win_width, win_height = win_height)
 
@@ -271,10 +278,23 @@ def spawnMenu(self):
 def drawMenu(self):
     for info in menu_data:
         window.blit(info['text'] , (info['pos'][0] , info['pos'][1]))
+
+def drawAbout(self , x ,y):
+    font = pygame.font.Font(None , (50))
+    text = font.render('In this game you need destroy enemy comets' , True , (0,0,0))
+    self.blit(text , (x , y))
+    text = font.render('You have 10 HP . You can see them in the bottom left.' , True , (0,0,0))
+    self.blit(text, (x, y+60))
+    text = font.render('You can also see a red square if you pick it up you add yourself HP' , True , (0,0,0))
+    self.blit(text , (x , y+120))
+
+def drawSettings(self , x , y):
+    font = pygame.font.Font(None , 50)
+    text = font.render(('Difficult :           ' + difficult[difficult_constant ]) , True , (0,0,0))
+    self .blit(text , (x , y))
+
+
 'main loop'
-
-
-
 
 while game_run:
     window.blit(text, (text_width, text_height ))
@@ -308,11 +328,26 @@ while game_run:
         if menu_constant == 0:
             start_constant = True
         if menu_constant == 1:
-            text = font.render('TODAY I AM TIRED .COMEBACK TOMORROW' , True , (0,0,0))
+            menu_info = True
         if menu_constant == 2:
-            text = font.render('BLALALALA' , True , (0,0,0))
+            menu_info = True
+        enter_game = ''
+        text = font.render(enter_game, True, (0, 0, 0))
         menu_draw = False
         time.tick()
+    if keys[pygame.K_ESCAPE]:
+        menu_draw = True
+        menu_info = False
+        start_constant = False
+        delay = 80
+    if keys[pygame.K_RIGHT] and menu_info:
+        difficult_constant+=1
+        if difficult_constant == 3:
+            difficult_constant = 0
+    if keys[pygame.K_LEFT] and menu_info:
+        difficult_constant-=1
+        if difficult_constant == -1:
+            difficult_constant = 2
     if keys[pygame.K_DOWN]:
         menu_constant += 1
         print(menu_constant)
@@ -320,10 +355,9 @@ while game_run:
             menu_constant = 0
         x_arrow , y_arrow = swapMenu(menu_constant,menu_data)
     if keys[pygame.K_UP]:
-        menu_constant += 1
-        print(menu_constant)
-        if menu_constant == 3:
-            menu_constant = 0
+        menu_constant -= 1
+        if menu_constant == -1:
+            menu_constant = 2
         x_arrow , y_arrow = swapMenu(menu_constant,menu_data)
     if menu_spawn:
         spawnMenu(window)
@@ -353,3 +387,10 @@ while game_run:
         text_width , text_height = win_width // 4.5 ,win_height // 2.6
         score_text = font.render(final_score + str(int(score//10)) , True , (0,0,0))
         score_text_width , score_text_height = win_width//2 - 225 , win_height//2
+
+    if  menu_info:
+        if menu_constant == 1:
+            drawSettings(window , 300 , 200 )
+        if menu_constant == 2:
+            drawAbout(window , 400 , 300 )
+
